@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="128" viewBox="0 0 96 128">
+  <g fill="none" stroke="#05080a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="5" width="86" height="118" rx="2" fill="#39424b"/>
+    <rect x="10" y="10" width="76" height="108" rx="1" fill="#2b333b"/>
+    <rect x="15" y="15" width="66" height="98" rx="1" fill="#333c45"/>
+    <path d="M15 15 H81 V113 H15 Z" fill="#2e363e"/>
+    <path d="M18 18 H78 V110 H18 Z" fill="none" stroke="#12181d" stroke-width="1.4"/>
+    <path d="M23 24 H73" stroke="#12181d" stroke-width="1.2"/>
+    <path d="M23 104 H73" stroke="#12181d" stroke-width="1.2"/>
+
+    <rect x="25" y="31" width="46" height="32" fill="#d8c9a4" stroke="#0a0d10" stroke-width="2"/>
+    <path d="M25 31 L71 63 M71 31 L25 63" stroke="#b23a2c" stroke-width="5" opacity="0.9"/>
+    <path d="M48 37 L40 51 H47 L43 61 L56 46 H49 Z" fill="#171b1e" stroke="none"/>
+
+    <rect x="28" y="72" width="40" height="7" fill="#151b20" stroke="#05080a" stroke-width="1.5"/>
+    <rect x="30" y="74" width="36" height="3" fill="#4d5a63" stroke="none"/>
+    <rect x="28" y="84" width="40" height="7" fill="#151b20" stroke="#05080a" stroke-width="1.5"/>
+    <rect x="30" y="86" width="36" height="3" fill="#4d5a63" stroke="none"/>
+
+    <circle cx="80" cy="30" r="2.2" fill="#0a0d10"/>
+    <circle cx="80" cy="62" r="2.2" fill="#0a0d10"/>
+    <circle cx="80" cy="94" r="2.2" fill="#0a0d10"/>
+    <path d="M80 36 V56" stroke="#0a0d10" stroke-width="2"/>
+    <path d="M80 68 V88" stroke="#0a0d10" stroke-width="2"/>
+
+    <rect x="83" y="71" width="4" height="13" rx="1" fill="#1a2025" stroke="#05080a" stroke-width="1.5"/>
+    <circle cx="25" cy="110" r="2.4" fill="#0a0d10"/>
+    <circle cx="71" cy="110" r="2.4" fill="#0a0d10"/>
+
+    <path d="M22 20 L30 20 M22 20 L22 28" stroke="#7d8b95" stroke-width="1" opacity="0.5"/>
+    <path d="M74 108 L74 100 M74 108 L66 108" stroke="#7d8b95" stroke-width="1" opacity="0.4"/>
+    <path d="M20 93 Q28 90 33 95 M58 96 Q66 92 73 96" stroke="#8a4b32" stroke-width="1.4" opacity="0.55"/>
+    <path d="M20 44 Q23 41 26 45 M66 55 Q70 51 74 55" stroke="#8a4b32" stroke-width="1.2" opacity="0.5"/>
+    <path d="M31 110 Q36 107 41 111 M52 110 Q57 107 62 111" stroke="#9b5a3c" stroke-width="1.2" opacity="0.5"/>
+
+    <path d="M84 12 V116" stroke="#8c9aa4" stroke-width="0.8" opacity="0.35"/>
+    <path d="M12 12 V116" stroke="#10151a" stroke-width="0.8" opacity="0.5"/>
+    <path d="M88 12 V116 M92 12 V116" stroke="#20272d" stroke-width="1" opacity="0.6"/>
+  </g>
+</svg>

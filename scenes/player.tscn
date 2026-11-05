@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player.svg" id="2_sprite"]
+[ext_resource type="Texture2D" path="res://assets/sprites/shadow.svg" id="3_shadow"]
+[ext_resource type="Texture2D" path="res://assets/textures/light_cone.svg" id="4_cone"]
+[ext_resource type="Texture2D" path="res://assets/textures/glow.svg" id="5_glow"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_player"]
+radius = 13.0
+height = 28.0
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_player")
+
+[node name="Shadow" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(0, 11)
+scale = Vector2(1.15, 0.95)
+texture = ExtResource("3_shadow")
+
+[node name="BodyGlow" type="PointLight2D" parent="."]
+position = Vector2(0, 8)
+color = Color(0.55, 0.85, 1, 1)
+energy = 0.3
+texture = ExtResource("5_glow")
+texture_scale = 0.65
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("2_sprite")
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_player")
+
+[node name="Aim" type="Node2D" parent="."]
+
+[node name="Flashlight" type="PointLight2D" parent="Aim"]
+color = Color(1, 0.94, 0.82, 1)
+energy = 1.4
+texture = ExtResource("4_cone")
+texture_scale = 2.35
+shadow_enabled = true
+shadow_filter = 1
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(0, -145)
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+zoom = Vector2(0.9, 0.9)
+limit_left = 0
+limit_top = 0
+limit_right = 1600
+limit_bottom = 1000

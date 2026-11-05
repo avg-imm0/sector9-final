@@ -1,0 +1,120 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
+[ext_resource type="FontFile" path="res://assets/fonts/PTMono-Regular.ttf" id="2_mono"]
+[ext_resource type="FontFile" path="res://assets/fonts/Oswald.ttf" id="3_sign"]
+[ext_resource type="FontFile" path="res://assets/fonts/EBGaramond.ttf" id="4_body"]
+
+[sub_resource type="Shader" id="Shader_ink"]
+code = "shader_type canvas_item;
+
+uniform float strength : hint_range(0.0, 1.0) = 0.72;
+uniform float scanlines : hint_range(0.0, 0.05) = 0.011;
+uniform float grain : hint_range(0.0, 0.15) = 0.038;
+
+float hash(vec2 p) {
+	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+void fragment() {
+	vec2 uv = UV - 0.5;
+	float d = length(uv * vec2(1.0, 0.92));
+	float v = smoothstep(0.31, 0.82, d) * strength;
+
+	float n = hash(floor(UV * vec2(920.0, 700.0)) + vec2(fract(TIME * 0.37) * 17.0, fract(TIME * 0.53) * 23.0)) - 0.5;
+	float fiber = (sin(UV.x * 420.0 + sin(UV.y * 57.0) * 3.1) * 0.5 + 0.5) * 0.008;
+	float scan = (0.5 + 0.5 * sin(UV.y * 1100.0)) * scanlines;
+
+	float alpha = clamp(v + scan + abs(n) * grain + fiber, 0.0, 0.96);
+	COLOR = vec4(vec3(0.012, 0.009, 0.007), alpha);
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ink"]
+shader = SubResource("Shader_ink")
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="PaperGrain" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_ink")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+
+[node name="LocationMark" type="ColorRect" parent="."]
+offset_left = 28.0
+offset_top = 23.0
+offset_right = 34.0
+offset_bottom = 29.0
+mouse_filter = 2
+color = Color(0.66, 0.12, 0.1, 1)
+
+[node name="Location" type="Label" parent="."]
+offset_left = 42.0
+offset_top = 18.0
+offset_right = 560.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(0.86, 0.82, 0.72, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("3_sign")
+theme_override_font_sizes/font_size = 17
+text = "СЕКТОР 09 · ДВОР · 03:47"
+
+[node name="AccentLine" type="ColorRect" parent="."]
+offset_left = 28.0
+offset_top = 44.0
+offset_right = 132.0
+offset_bottom = 45.0
+mouse_filter = 2
+color = Color(0.66, 0.12, 0.1, 0.65)
+
+[node name="Objective" type="Label" parent="."]
+offset_left = 28.0
+offset_top = 52.0
+offset_right = 720.0
+offset_bottom = 76.0
+theme_override_colors/font_color = Color(0.92, 0.77, 0.49, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("4_body")
+theme_override_font_sizes/font_size = 19
+text = "> Поговорить со сторожем"
+
+[node name="Weather" type="Label" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -300.0
+offset_top = 22.0
+offset_right = -28.0
+offset_bottom = 40.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(0.56, 0.59, 0.58, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_mono")
+theme_override_font_sizes/font_size = 11
+text = "ЛИВЕНЬ · +6°C · ШУМ 47 ДБ"
+horizontal_alignment = 2
+
+[node name="Controls" type="Label" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -38.0
+offset_right = 900.0
+offset_bottom = -16.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.56, 0.55, 0.5, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_mono")
+theme_override_font_sizes/font_size = 11
+text = "WASD — идти · SHIFT — бежать · F — фонарь · E — взаимодействовать"

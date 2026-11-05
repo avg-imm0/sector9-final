@@ -1,0 +1,8 @@
+﻿SFX: Circuit breaker (ON/OFF)
+Author: Cleyton Kauffman (CleytonKauffman)
+Source: https://opengameart.org/content/sfx-circuit-breaker
+License: CC0 1.0 Universal (Public Domain Dedication)
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Copyright/Attribution Notice from the source page:
+"SFX by Cleyton Kauffman - https://soundcloud.com/cleytonkauffman"

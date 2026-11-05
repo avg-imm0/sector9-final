@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle_panel.gd" id="1_panel"]
+[ext_resource type="Texture2D" path="res://assets/sprites/breaker_cabinet.svg" id="2_cabinet"]
+[ext_resource type="Texture2D" path="res://assets/textures/glow.svg" id="3_glow"]
+[ext_resource type="FontFile" path="res://assets/fonts/PTMono-Regular.ttf" id="4_font"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_panel"]
+radius = 140.0
+
+[node name="PuzzlePanel" type="Node2D"]
+script = ExtResource("1_panel")
+prompt_text = "E — открыть щиток"
+prompt_offset = Vector2(-100, -92)
+
+[node name="Plate" type="Sprite2D" parent="."]
+scale = Vector2(0.92, 0.92)
+texture = ExtResource("2_cabinet")
+
+[node name="Led" type="Sprite2D" parent="."]
+position = Vector2(30, -21)
+scale = Vector2(0.13, 0.13)
+texture = ExtResource("3_glow")
+modulate = Color(1, 0.3, 0.18, 1)
+
+[node name="Area" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitoring = true
+
+[node name="Shape" type="CollisionShape2D" parent="Area"]
+shape = SubResource("CircleShape2D_panel")
+
+[node name="Prompt" type="Label" parent="."]
+offset_left = -110.0
+offset_top = -104.0
+offset_right = 110.0
+offset_bottom = -80.0
+z_index = 50
+theme_override_colors/font_color = Color(0.93, 0.88, 0.76, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 12
+text = "E — открыть щиток"
+horizontal_alignment = 1

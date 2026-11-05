@@ -1,0 +1,55 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/npc.gd" id="1_npc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/npc.svg" id="2_sprite"]
+[ext_resource type="Texture2D" path="res://assets/sprites/shadow.svg" id="3_shadow"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_npc"]
+radius = 11.0
+height = 26.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_area"]
+radius = 180.0
+
+[node name="NPC" type="Node2D"]
+script = ExtResource("1_npc")
+prompt_text = "E — говорить"
+prompt_offset = Vector2(-110, -84)
+
+[node name="Shadow" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(0, 11)
+scale = Vector2(1.1, 0.9)
+texture = ExtResource("3_shadow")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("2_sprite")
+
+[node name="Body" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 1
+
+[node name="Shape" type="CollisionShape2D" parent="Body"]
+shape = SubResource("CapsuleShape2D_npc")
+
+[node name="Area" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitoring = true
+
+[node name="Shape" type="CollisionShape2D" parent="Area"]
+shape = SubResource("CircleShape2D_area")
+
+[node name="Prompt" type="Label" parent="."]
+offset_left = -110.0
+offset_top = -84.0
+offset_right = 110.0
+offset_bottom = -60.0
+z_index = 50
+theme_override_colors/font_color = Color(0.93, 0.88, 0.76, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 12
+text = "E — говорить"
+horizontal_alignment = 1
