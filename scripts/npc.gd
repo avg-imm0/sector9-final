@@ -29,6 +29,7 @@ func _on_dialogue_finished() -> void:
 		return
 	_in_npc_dialogue = false
 	if GameState.power_on:
-		GameState.set_objective("Прототип пройден")
+		GameState.give_key()
+		GameState.set_objective("Открыть подсобку за киоском")
 	else:
 		GameState.set_objective("Восстановить питание в щитке")

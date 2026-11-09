@@ -1,0 +1,73 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/backroom.gd" id="1_backroom"]
+[ext_resource type="Texture2D" path="res://assets/sprites/backroom_door.svg" id="2_door"]
+[ext_resource type="Texture2D" path="res://assets/sprites/shadow.svg" id="3_shadow"]
+[ext_resource type="Texture2D" path="res://assets/textures/glow.svg" id="4_glow"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(56, 86)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_area"]
+radius = 120.0
+
+[node name="Backroom" type="Node2D"]
+script = ExtResource("1_backroom")
+prompt_text = "E — осмотреть дверь"
+prompt_offset = Vector2(-90, -120)
+
+[node name="Shadow" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(0, 44)
+scale = Vector2(1.05, 0.45)
+texture = ExtResource("3_shadow")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_door")
+
+[node name="Led" type="Sprite2D" parent="."]
+position = Vector2(20, -12)
+scale = Vector2(0.28, 0.28)
+texture = ExtResource("4_glow")
+
+[node name="Sign" type="Label" parent="."]
+offset_left = -50.0
+offset_top = -66.0
+offset_right = 50.0
+offset_bottom = -48.0
+z_index = 5
+theme_override_colors/font_color = Color(0.8, 0.75, 0.62, 0.9)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 9
+text = "ПОДСОБКА"
+horizontal_alignment = 1
+
+[node name="Body" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 1
+
+[node name="Shape" type="CollisionShape2D" parent="Body"]
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_body")
+
+[node name="Area" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitoring = true
+
+[node name="Shape" type="CollisionShape2D" parent="Area"]
+shape = SubResource("CircleShape2D_area")
+
+[node name="Prompt" type="Label" parent="."]
+offset_left = -90.0
+offset_top = -120.0
+offset_right = 90.0
+offset_bottom = -98.0
+z_index = 50
+theme_override_colors/font_color = Color(0.93, 0.88, 0.76, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 12
+text = "E — осмотреть дверь"
+horizontal_alignment = 1

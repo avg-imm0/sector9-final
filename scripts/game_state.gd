@@ -4,8 +4,11 @@ extends Node
 
 signal objective_changed(text: String)
 signal power_restored
+signal key_received
 
 var power_on := false
+var has_key := false
+var ending_seen := false
 var ui_blocked := false
 var objective := "Поговорить со сторожем"
 
@@ -22,3 +25,10 @@ func restore_power() -> void:
 		return
 	power_on = true
 	power_restored.emit()
+
+
+func give_key() -> void:
+	if has_key:
+		return
+	has_key = true
+	key_received.emit()

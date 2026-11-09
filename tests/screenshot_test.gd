@@ -36,6 +36,11 @@ func _ready() -> void:
 	await get_tree().create_timer(1.7).timeout
 	await _capture("powered")
 
+	var ending: Node = _main.get_node("Ending")
+	ending.show_ending()
+	await get_tree().create_timer(0.6).timeout
+	await _capture("ending")
+
 	get_tree().quit()
 
 

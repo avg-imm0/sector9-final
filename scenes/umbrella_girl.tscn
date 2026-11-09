@@ -1,0 +1,56 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/umbrella_girl.gd" id="1_girl"]
+[ext_resource type="Texture2D" path="res://assets/sprites/umbrella_girl.svg" id="2_sprite"]
+[ext_resource type="Texture2D" path="res://assets/sprites/shadow.svg" id="3_shadow"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 10.0
+height = 24.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_area"]
+radius = 125.0
+
+[node name="UmbrellaGirl" type="Node2D"]
+script = ExtResource("1_girl")
+prompt_text = "E — поговорить"
+prompt_offset = Vector2(-100, -78)
+
+[node name="Shadow" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(0, 12)
+scale = Vector2(0.95, 0.7)
+texture = ExtResource("3_shadow")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("2_sprite")
+
+[node name="Body" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 1
+
+[node name="Shape" type="CollisionShape2D" parent="Body"]
+position = Vector2(0, 2)
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="Area" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitoring = true
+
+[node name="Shape" type="CollisionShape2D" parent="Area"]
+shape = SubResource("CircleShape2D_area")
+
+[node name="Prompt" type="Label" parent="."]
+offset_left = -100.0
+offset_top = -78.0
+offset_right = 100.0
+offset_bottom = -56.0
+z_index = 50
+theme_override_colors/font_color = Color(0.93, 0.88, 0.76, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.02, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 12
+text = "E — поговорить"
+horizontal_alignment = 1
