@@ -14,6 +14,7 @@ const BREAKER_STREAM: AudioStream = preload("res://assets/audio/breaker.ogg")
 const FAIL_STREAM: AudioStream = preload("res://assets/audio/fail.wav")
 const POWERUP_STREAM: AudioStream = preload("res://assets/audio/powerup.wav")
 const TICK_STREAM: AudioStream = preload("res://assets/audio/tick.wav")
+const STATIC_STREAM: AudioStream = preload("res://assets/audio/radio_static.wav")
 
 var _enabled := false
 var _rng := RandomNumberGenerator.new()
@@ -32,6 +33,7 @@ var _breaker: AudioStreamPlayer
 var _fail: AudioStreamPlayer
 var _powerup: AudioStreamPlayer
 var _tick: AudioStreamPlayer
+var _static: AudioStreamPlayer
 
 
 func _ready() -> void:
@@ -50,6 +52,7 @@ func _ready() -> void:
 	_fail = _make_one_shot(FAIL_STREAM)
 	_powerup = _make_one_shot(POWERUP_STREAM)
 	_tick = _make_one_shot(TICK_STREAM)
+	_static = _make_one_shot(STATIC_STREAM)
 
 	if not _enabled:
 		return
@@ -65,6 +68,7 @@ func _make_loop(stream: AudioStream, volume: float) -> AudioStreamPlayer:
 	var player := AudioStreamPlayer.new()
 	player.stream = _looping(stream)
 	player.volume_db = volume
+	player.bus = "Ambience" if AudioServer.get_bus_index("Ambience") != -1 else "Master"
 	add_child(player)
 	if _enabled:
 		player.play()
@@ -75,6 +79,7 @@ func _make_one_shot(stream: AudioStream) -> AudioStreamPlayer:
 	var player := AudioStreamPlayer.new()
 	player.stream = stream
 	player.volume_db = -8.0
+	player.bus = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
 	add_child(player)
 	return player
 
@@ -167,3 +172,11 @@ func play_ui_click() -> void:
 	_tick.pitch_scale = 0.78
 	_tick.volume_db = -17.0
 	_tick.play()
+
+
+func play_static() -> void:
+	if not _enabled:
+		return
+	_static.pitch_scale = _rng.randf_range(0.94, 1.02)
+	_static.volume_db = -24.0
+	_static.play()

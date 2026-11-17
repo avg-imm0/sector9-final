@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3]
+[gd_scene load_steps=33 format=3]
 
 [ext_resource type="Script" path="res://scripts/game.gd" id="0_game"]
 [ext_resource type="Script" path="res://scripts/world.gd" id="1_world"]
@@ -22,6 +22,7 @@
 [ext_resource type="PackedScene" path="res://scenes/backroom.tscn" id="20_backroom"]
 [ext_resource type="PackedScene" path="res://scenes/ending.tscn" id="21_ending"]
 [ext_resource type="PackedScene" path="res://scenes/umbrella_girl.tscn" id="22_girl"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="23_pause"]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rain"]
 emission_shape = 3
@@ -334,3 +335,5 @@ texture_scale = 2.4
 [node name="HUD" parent="." instance=ExtResource("7_hud")]
 
 [node name="Ending" parent="." instance=ExtResource("21_ending")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("23_pause")]

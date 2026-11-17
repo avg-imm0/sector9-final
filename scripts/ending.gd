@@ -8,6 +8,7 @@ signal ending_dismissed
 
 var _root: Control
 var _panel: Control
+var _kicker: Label
 var _title: Label
 var _body: Label
 var _stamp: Label
@@ -89,6 +90,7 @@ func _build_ui() -> void:
 	var kicker := UITheme.label("СЕКТОР 09 // ДВОР // СМЕНА ЗАВЕРШЕНА", 13, UITheme.AMBER)
 	kicker.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_child(kicker)
+	_kicker = kicker
 
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -137,21 +139,20 @@ func _build_ui() -> void:
 	buttons.add_child(_quit_button)
 
 
-func show_ending() -> void:
+func show_ending(kind: String = "") -> void:
 	if visible:
 		return
+	if kind.is_empty():
+		kind = GameState.ending_kind if not GameState.ending_kind.is_empty() else "keep"
 	GameState.ending_seen = true
+	GameState.ending_kind = kind
+	GameState.story_flags["final_choice"] = kind
 	GameState.ui_blocked = true
-	GameState.set_objective("Срез пройден")
 	Audio.play_ui_click()
-	_title.text = "СВЕТ ЕСТЬ"
-	_body.text = (
-		"Питание восстановлено. Неон киоска гудит, кот-бухгалтер пересчитывает чеки, "
-		+ "а Гриша остался сторожить свой кусок бетона от дождя.\n\n"
-		+ "Подсобка открыта. Внутри пахнет пылью, чайником и старой проводкой. "
-		+ "На столе мигает монитор: «СЕКТОР 9. СМЕНА ПРИНЯТА».\n\n"
-		+ "Двор наконец-то работает. Ненадолго — но это уже немало."
-	)
+	if kind == "release":
+		_show_release()
+	else:
+		_show_keep()
 	visible = true
 	_root.modulate = Color(1, 1, 1, 0)
 	_panel.scale = Vector2(0.97, 0.97)
@@ -160,6 +161,33 @@ func show_ending() -> void:
 	tween.tween_property(_root, "modulate", Color(1, 1, 1, 1), 0.35)
 	tween.tween_property(_panel, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	ending_shown.emit()
+
+
+func _show_keep() -> void:
+	GameState.set_objective("Финал: смена принята")
+	_kicker.text = "СЕКТОР 09 // УЗЕЛ // РАБОТАЕТ"
+	_title.text = "СМЕНА ПРИНЯТА"
+	_stamp.text = "ФАЙЛ ЗАКРЫТ"
+	_body.text = (
+		"Ты остаёшься. Монитор гаснет, но за стеной снова гудит неон — ровно, как метроном.\n\n"
+		+ "Дождь продолжает идти. Снаружи — Тишина, и пока узел тёплый, она не подходит ближе.\n\n"
+		+ "Гриша не узнает, что теперь у двора новый оператор. Кот-бухгалтер просто получит ещё один чек.\n\n"
+		+ "Смена бессрочная. Но свет есть — а это уже немало."
+	)
+
+
+func _show_release() -> void:
+	GameState.set_objective("Финал: дождь остановлен")
+	Audio.set_power(false)
+	_kicker.text = "СЕКТОР 09 // УЗЕЛ // ОТКЛЮЧЁН"
+	_title.text = "ДОЖДЬ КОНЧИЛСЯ"
+	_stamp.text = "СМЕНА СДАНА"
+	_body.text = (
+		"Ты снимаешь нагрузку. Гул стихает, неон гаснет, и впервые с двух тысяч девятого над двором становится тихо.\n\n"
+		+ "Гриша выходит из-под навеса и долго смотрит на небо. Девушка с зонтом закрывает его и не говорит ни слова.\n\n"
+		+ "Кот роняет последний чек. На бумаге — пустая строка вместо суммы.\n\n"
+		+ "Мир не закончился. Он просто стал тише — и в этой тишине слышно, как начинается утро."
+	)
 
 
 func hide_ending() -> void:

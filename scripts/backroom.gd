@@ -1,7 +1,7 @@
 extends Interactable
 
 ## Backroom door behind the kiosk. It needs power and the key from Grisha.
-## Finishing the final dialogue hands control to the ending card.
+## The monitor inside ends the chapter with one of two final choices.
 
 @onready var sprite: Sprite2D = $Sprite
 @onready var led: Sprite2D = $Led
@@ -11,6 +11,7 @@ var _awaiting_ending := false
 
 func _setup() -> void:
 	Dialogue.dialogue_finished.connect(_on_dialogue_finished)
+	Dialogue.dialogue_started.connect(_on_dialogue_started)
 
 
 func _update(delta: float) -> void:
@@ -40,10 +41,22 @@ func interact() -> void:
 	Dialogue.start("backroom")
 
 
+func _on_dialogue_started() -> void:
+	if Dialogue.current_id != "monitor":
+		return
+	GameState.chapter = "Подсобка"
+	GameState.story_flags["monitor_seen"] = true
+	GameState.set_objective("Решить судьбу сектора")
+	Audio.play_static()
+
+
 func _on_dialogue_finished() -> void:
 	if not _awaiting_ending:
 		return
+	var last := Dialogue.last_finished_id
 	_awaiting_ending = false
+	if last != "final_keep" and last != "final_release":
+		return
 	var ending := get_tree().get_first_node_in_group("ending")
 	if ending != null:
-		ending.call("show_ending")
+		ending.call("show_ending", "keep" if last == "final_keep" else "release")

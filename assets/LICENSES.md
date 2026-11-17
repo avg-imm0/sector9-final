@@ -51,7 +51,7 @@
 
 ### Шрифты
 
-Все три шрифта распространяются по SIL Open Font License 1.1
+Все шрифты распространяются по SIL Open Font License 1.1
 (https://openfontlicense.org/). Тексты лицензий лежат рядом со шрифтами.
 
 | Шрифт | Файл | Автор / источник | Лицензия |
@@ -59,6 +59,7 @@
 | EB Garamond | `assets/fonts/EBGaramond.ttf` | The EB Garamond Project Authors, https://github.com/octaviopardo/EBGaramond12 | SIL OFL 1.1, `assets/fonts/OFL-EBGaramond.txt` |
 | PT Mono | `assets/fonts/PTMono-Regular.ttf` | ParaType Ltd., https://www.paratype.com/fonts/pt/pt-mono | SIL OFL 1.1, `assets/fonts/OFL-PTMono.txt` |
 | Oswald | `assets/fonts/Oswald.ttf` | The Oswald Project Authors, https://github.com/googlefonts/OswaldFont | SIL OFL 1.1, `assets/fonts/OFL-Oswald.txt` |
+| Unbounded | `assets/fonts/Unbounded.ttf` | The Unbounded Project Authors, https://github.com/googlefonts/unbounded | SIL OFL 1.1, `assets/fonts/OFL-Unbounded.txt` |
 
 ## Авторские материалы проекта
 
@@ -71,6 +72,8 @@
   лужи, отражения, мусор и граффити;
 - шейдеры виньетки, зерна и бумаги в `scenes/hud.tscn` и `scripts/ink_panel.gd`;
 - `assets/textures/paper.jpg` — процедурно сгенерированная бумажная текстура;
+- `assets/textures/menu_bg.png` — кадр игрового двора, снятый для меню проекта;
+- `assets/audio/radio_static.wav` — синтезированный радиопомех для монитора в подсобке;
 - `assets/audio/tick.wav`, `assets/audio/fail.wav`, `assets/audio/powerup.wav` —
   синтезированные звуки для печатной машинки, короткого замыкания и включения питания;
 - весь код на GDScript, сцены, JSON-диалоги и тексты.

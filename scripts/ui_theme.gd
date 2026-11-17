@@ -7,6 +7,7 @@ extends RefCounted
 const FONT_BODY: Font = preload("res://assets/fonts/EBGaramond.ttf")
 const FONT_MONO: Font = preload("res://assets/fonts/PTMono-Regular.ttf")
 const FONT_SIGN: Font = preload("res://assets/fonts/Oswald.ttf")
+const FONT_DISPLAY: Font = preload("res://assets/fonts/Unbounded.ttf")
 const PAPER: Texture2D = preload("res://assets/textures/paper.jpg")
 
 const INK := Color(0.042, 0.039, 0.035, 0.97)

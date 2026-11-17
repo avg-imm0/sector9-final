@@ -337,7 +337,7 @@ func _process(delta: float) -> void:
 	if not is_open or not _typing:
 		return
 	var before := int(_visible_chars)
-	_visible_chars = minf(_visible_chars + CHARS_PER_SECOND * delta, float(_total_chars))
+	_visible_chars = minf(_visible_chars + CHARS_PER_SECOND * AppSettings.text_speed * delta, float(_total_chars))
 	_text_label.visible_characters = int(_visible_chars)
 	if int(_visible_chars) / 3 != before / 3:
 		Audio.play_type_tick()

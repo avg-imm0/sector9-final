@@ -117,4 +117,4 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_mono")
 theme_override_font_sizes/font_size = 11
-text = "WASD — идти · SHIFT — бежать · F — фонарь · E — взаимодействовать"
+text = "WASD — идти · SHIFT — бежать · F — фонарь · E — взаимодействовать · ESC — пауза"

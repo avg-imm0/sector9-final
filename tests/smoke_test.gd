@@ -41,6 +41,14 @@ func _ready() -> void:
 
 	_check(GameState.objective == "Поговорить со сторожем", "initial objective")
 	_check(not GameState.power_on, "power starts off")
+	_check(AppSettings.text_speed >= 0.5, "settings load with a sane text speed")
+	_check(SaveGame.metadata(SaveGame.LAST_MANUAL_SLOT) is Dictionary, "save metadata API responds")
+
+	var pause: Node = _main.get_node("PauseMenu")
+	pause.open()
+	_check(get_tree().paused and pause.visible, "pause menu pauses the game")
+	pause.close()
+	_check(not get_tree().paused, "pause menu resumes the game")
 
 	Dialogue.start("intro")
 	_check(Dialogue.is_open and Dialogue.current_id == "intro", "intro dialogue opens")
@@ -127,12 +135,30 @@ func _ready() -> void:
 	var ending: Node = _main.get_node("Ending")
 	backroom.interact()
 	_check(Dialogue.current_id == "backroom", "unlocked backroom dialogue opens")
-	Dialogue.close()
-	_check(ending.visible, "finishing the backroom dialogue shows the ending card")
+	for i in 5:
+		Dialogue._advance()
+	_check(Dialogue._choices_shown, "backroom offers the monitor")
+	Dialogue._on_choice_pressed(0)
+	_check(Dialogue.current_id == "monitor", "monitor starts the final chapter")
+	_check(GameState.chapter == "Подсобка" and GameState.objective == "Решить судьбу сектора", "monitor sets the final objective")
+	for i in 7:
+		Dialogue._advance()
+	_check(Dialogue._choices_shown, "monitor offers the final choice")
+	Dialogue._on_choice_pressed(1)
+	_check(Dialogue.current_id == "final_keep", "keep ending branch selected")
+	for i in 3:
+		Dialogue._advance()
+	_check(Dialogue._choices_shown, "keep branch closes with a choice")
+	Dialogue._on_choice_pressed(0)
+	_check(ending.visible, "finishing the final dialogue shows the ending card")
 	_check(GameState.ending_seen and GameState.ui_blocked, "ending card sets the end state")
-	_check(GameState.objective == "Срез пройден", "ending card sets the final objective")
+	_check(GameState.ending_kind == "keep", "ending card remembers the choice")
+	_check(GameState.objective == "Финал: смена принята", "ending card sets the final objective")
 	ending.hide_ending()
 	_check(not ending.visible and not GameState.ui_blocked, "ending card can be dismissed")
+	ending.show_ending("release")
+	_check(GameState.ending_kind == "release" and GameState.objective == "Финал: дождь остановлен", "release ending has its own state")
+	ending.hide_ending()
 
 	print("SMOKE RESULT: %d failure(s)" % _failures)
 	get_tree().quit(1 if _failures > 0 else 0)
