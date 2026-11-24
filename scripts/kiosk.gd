@@ -27,6 +27,9 @@ func _process(delta: float) -> void:
 
 
 func _ready() -> void:
+	var details := Node2D.new()
+	details.set_script(preload("res://scripts/kiosk_details.gd"))
+	add_child(details)
 	_apply_power(GameState.power_on, true)
 	GameState.power_restored.connect(_on_power_restored)
 

@@ -1,15 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="128" viewBox="0 0 256 128">
   <defs>
-    <radialGradient id="water" cx="50%" cy="50%" r="52%">
-      <stop offset="0" stop-color="#0b2433" stop-opacity="0.9"/>
-      <stop offset="0.7" stop-color="#071724" stop-opacity="0.7"/>
-      <stop offset="1" stop-color="#04101a" stop-opacity="0.25"/>
+    <radialGradient id="water" cx="48%" cy="44%" r="56%">
+      <stop offset="0" stop-color="#0d2b3c" stop-opacity="0.95"/>
+      <stop offset="0.55" stop-color="#071b28" stop-opacity="0.85"/>
+      <stop offset="0.85" stop-color="#05121c" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#040e16" stop-opacity="0.12"/>
+    </radialGradient>
+    <radialGradient id="rim" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#7fe8ff" stop-opacity="0"/>
+      <stop offset="0.8" stop-color="#7fe8ff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#7fe8ff" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <ellipse cx="128" cy="64" rx="120" ry="54" fill="url(#water)"/>
-  <ellipse cx="92" cy="58" rx="58" ry="28" fill="#0d2c3d" opacity="0.45"/>
-  <path d="M44 60 L104 58" stroke="#3fd9ff" stroke-width="3" opacity="0.22"/>
-  <path d="M118 78 L198 76" stroke="#ff3d8a" stroke-width="2" opacity="0.16"/>
-  <path d="M70 82 L142 80" stroke="#7de6ff" stroke-width="2" opacity="0.12"/>
-  <path d="M150 46 L214 45" stroke="#ffd27a" stroke-width="1.5" opacity="0.1"/>
+
+  <ellipse cx="128" cy="66" rx="122" ry="56" fill="url(#rim)"/>
+  <path d="M12 70 Q18 30 62 18 Q120 4 182 16 Q232 26 244 66 Q236 106 180 116 Q112 126 54 108 Q16 96 12 70 Z" fill="url(#water)"/>
+  <path d="M12 70 Q18 30 62 18 Q120 4 182 16 Q232 26 244 66 Q236 106 180 116 Q112 126 54 108 Q16 96 12 70 Z" fill="none" stroke="#5fc9e8" stroke-width="1.2" opacity="0.45"/>
+
+  <!-- Inner eddies -->
+  <ellipse cx="90" cy="56" rx="56" ry="26" fill="#10394d" opacity="0.32"/>
+  <ellipse cx="172" cy="80" rx="42" ry="18" fill="#0a2a38" opacity="0.4"/>
+
+  <!-- Neon reflections -->
+  <path d="M40 60 L104 57" stroke="#3fd9ff" stroke-width="3.5" opacity="0.3"/>
+  <path d="M54 68 L120 65" stroke="#3fd9ff" stroke-width="2" opacity="0.16"/>
+  <path d="M116 80 L198 77" stroke="#ff3d8a" stroke-width="2.5" opacity="0.22"/>
+  <path d="M132 86 L186 84" stroke="#ff3d8a" stroke-width="1.4" opacity="0.14"/>
+  <path d="M70 84 L142 81" stroke="#7de6ff" stroke-width="2" opacity="0.18"/>
+  <path d="M150 47 L214 45" stroke="#ffd27a" stroke-width="1.6" opacity="0.14"/>
+  <path d="M96 34 L162 32" stroke="#c5e8ff" stroke-width="1.2" opacity="0.1"/>
+
+  <!-- Rain rings -->
+  <g fill="none" stroke="#bfeaff" stroke-width="0.9">
+    <ellipse cx="74" cy="72" rx="9" ry="4" opacity="0.3"/>
+    <ellipse cx="74" cy="72" rx="15" ry="6" opacity="0.16"/>
+    <ellipse cx="186" cy="52" rx="7" ry="3" opacity="0.28"/>
+    <ellipse cx="186" cy="52" rx="12" ry="5" opacity="0.14"/>
+    <ellipse cx="132" cy="96" rx="8" ry="3.5" opacity="0.22"/>
+  </g>
+
+  <!-- Droplets catching light -->
+  <g fill="#d8f4ff" opacity="0.4">
+    <circle cx="68" cy="72" r="1.2"/><circle cx="188" cy="51" r="1"/>
+    <circle cx="130" cy="95" r="1.1"/><circle cx="152" cy="62" r="0.8"/>
+  </g>
 </svg>

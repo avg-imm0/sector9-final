@@ -1,15 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <rect x="5" y="5" width="54" height="54" rx="3" fill="#160e08"/>
-  <rect x="8" y="8" width="48" height="48" fill="#4a3320"/>
-  <path d="M8 22 H56 M8 38 H56 M22 8 V56 M42 8 V56" stroke="#2a1c10" stroke-width="2" opacity="0.8"/>
-  <path d="M10 12 H20 V20 H10 Z M44 44 H54 V52 H44 Z" fill="#7f5a32" opacity="0.35"/>
-  <rect x="8" y="8" width="6" height="48" fill="#6b6a62"/>
-  <rect x="50" y="8" width="6" height="48" fill="#5a5952"/>
-  <rect x="8" y="8" width="48" height="5" fill="#6b6a62"/>
-  <rect x="8" y="51" width="48" height="5" fill="#5a5952"/>
-  <circle cx="11" cy="11" r="1.5" fill="#2a2a26"/>
-  <circle cx="53" cy="11" r="1.5" fill="#2a2a26"/>
-  <circle cx="11" cy="53" r="1.5" fill="#2a2a26"/>
-  <circle cx="53" cy="53" r="1.5" fill="#2a2a26"/>
-  <rect x="27" y="28" width="11" height="8" fill="#b8442e" opacity="0.7"/>
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#6b4b2c"/>
+      <stop offset="0.5" stop-color="#493018"/>
+      <stop offset="1" stop-color="#2a1b0e"/>
+    </linearGradient>
+    <linearGradient id="strap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7d7b70"/>
+      <stop offset="0.5" stop-color="#55544e"/>
+      <stop offset="1" stop-color="#34342f"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="3" y="3" width="58" height="58" rx="2" fill="#0d0906"/>
+  <rect x="6" y="6" width="52" height="52" fill="url(#wood)"/>
+
+  <!-- Wood grain -->
+  <g stroke="#2c1a0c" stroke-width="0.55" fill="none" opacity="0.65">
+    <path d="M9 13 Q20 15 30 12 M33 13 Q44 10 55 14 M10 27 Q22 25 31 28 M34 27 Q45 30 54 26"/>
+    <path d="M9 43 Q20 41 30 44 M34 43 Q45 40 55 44 M10 55 Q22 53 31 56 M35 55 Q45 57 54 54"/>
+  </g>
+  <g stroke="#8b663d" stroke-width="0.5" fill="none" opacity="0.4">
+    <path d="M11 16 Q19 18 28 15 M36 30 Q45 32 53 29 M12 46 Q21 48 29 45"/>
+  </g>
+
+  <!-- Plank divisions -->
+  <path d="M8 22 H56 M8 38 H56 M22 8 V56 M42 8 V56" stroke="#241508" stroke-width="2" opacity="0.85"/>
+  <path d="M8 23 H56 M8 39 H56 M23 8 V56 M43 8 V56" stroke="#8b6438" stroke-width="0.7" opacity="0.35"/>
+
+  <!-- Metal corner straps -->
+  <rect x="7" y="7" width="7" height="50" fill="url(#strap)"/>
+  <rect x="50" y="7" width="7" height="50" fill="url(#strap)"/>
+  <rect x="7" y="7" width="50" height="6" fill="url(#strap)"/>
+  <rect x="7" y="51" width="50" height="6" fill="url(#strap)"/>
+  <g stroke="#1c1e1a" stroke-width="0.6" opacity="0.7">
+    <path d="M8 16 H14 M50 16 H56 M8 46 H14 M50 46 H56 M18 8 V13 M46 8 V13 M18 51 V56 M46 51 V56"/>
+  </g>
+
+  <!-- Screws -->
+  <g fill="#252722" stroke="#88887e" stroke-width="0.5">
+    <circle cx="10.5" cy="10.5" r="1.4"/><circle cx="53.5" cy="10.5" r="1.4"/>
+    <circle cx="10.5" cy="53.5" r="1.4"/><circle cx="53.5" cy="53.5" r="1.4"/>
+  </g>
+
+  <!-- Rust on straps -->
+  <ellipse cx="10" cy="34" rx="4" ry="7" fill="#8a4a1e" opacity="0.35"/>
+  <ellipse cx="53" cy="24" rx="4" ry="6" fill="#8a4a1e" opacity="0.3"/>
+
+  <!-- Torn shipping label -->
+  <rect x="27" y="29" width="12" height="8" fill="#c1b193" opacity="0.78"/>
+  <path d="M36 37 L39 34 L36 31" fill="#493018" opacity="0.9"/>
+  <g stroke="#5a4730" stroke-width="0.6" opacity="0.8">
+    <path d="M29 32 H36 M29 34 H35 M29 36 H34"/>
+  </g>
+  <path d="M25 45 L30 42 L32 47" stroke="#1a0e06" stroke-width="1" fill="none" opacity="0.6"/>
 </svg>

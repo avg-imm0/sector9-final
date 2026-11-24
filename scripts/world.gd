@@ -6,12 +6,15 @@ extends Node2D
 const WORLD := Vector2(1600, 1000)
 const FONT_SIGN: Font = preload("res://assets/fonts/Oswald.ttf")
 const FONT_BODY: Font = preload("res://assets/fonts/EBGaramond.ttf")
+const GLOW: Texture2D = preload("res://assets/textures/glow.svg")
 
 const GROUND_TEX_SIZE := Vector2i(800, 500)
 const CONCRETE_TEX_SIZE := 512
 
 var _asphalt: ImageTexture
 var _concrete: ImageTexture
+var _facade_top: ImageTexture
+var _facade_side: ImageTexture
 var _metal: NoiseTexture2D
 var _font: Font
 var _time := 0.0
@@ -24,6 +27,8 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	_asphalt = _make_asphalt_texture()
 	_concrete = _make_concrete_texture()
+	_facade_top = _make_facade_texture(800, 80, 41)
+	_facade_side = _make_facade_texture(120, 500, 93)
 	_metal = _make_noise(
 		0.16, 128,
 		Color(0.3, 0.34, 0.39),
@@ -147,6 +152,81 @@ func _make_concrete_texture() -> ImageTexture:
 	return ImageTexture.create_from_image(img)
 
 
+## Full facade texture for the courtyard walls: concrete panels, brick
+## patches, rust, grime drips and water stains. Generated per wall, not tiled.
+func _make_facade_texture(w: int, h: int, seed_value: int) -> ImageTexture:
+	var img := Image.create(w, h, true, Image.FORMAT_RGBA8)
+	var grain := FastNoiseLite.new()
+	grain.frequency = 0.45
+	grain.fractal_octaves = 3
+	var stain := FastNoiseLite.new()
+	stain.frequency = 0.006
+	stain.fractal_octaves = 3
+	for y in h:
+		for x in w:
+			var g := grain.get_noise_2d(float(x) + seed_value, float(y)) * 0.5 + 0.5
+			var s := stain.get_noise_2d(float(x) + seed_value, float(y)) * 0.5 + 0.5
+			var v := 0.19 + g * 0.15 + s * 0.16
+			img.set_pixel(x, y, Color(v * 0.95, v, v * 1.12, 1.0))
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	# Panel joints with a fine light edge.
+	var step_x := maxi(40, w / 6)
+	var step_y := maxi(40, h / 6)
+	for sx in range(0, w, step_x):
+		for y in h:
+			var old := img.get_pixel(sx, y)
+			img.set_pixel(sx, y, old.lerp(Color(0.035, 0.04, 0.045, 1.0), 0.8))
+	for sy in range(0, h, step_y):
+		for x in w:
+			var old := img.get_pixel(x, sy)
+			img.set_pixel(x, sy, old.lerp(Color(0.04, 0.045, 0.05, 1.0), 0.7))
+
+	# Exposed brick patches with mortar lines.
+	for i in 8:
+		var cx := rng.randi_range(6, maxi(6, w - 6))
+		var cy := rng.randi_range(6, maxi(6, h - 6))
+		var bw := rng.randi_range(14, maxi(14, w / 4))
+		var bh := rng.randi_range(12, maxi(12, h / 4))
+		for py in range(cy, mini(cy + bh, h)):
+			for px in range(cx, mini(cx + bw, w)):
+				var old := img.get_pixel(px, py)
+				img.set_pixel(px, py, old.lerp(Color(0.3, 0.15, 0.1, 1.0), 0.4))
+		for py in range(cy, mini(cy + bh, h), 5):
+			for px in range(cx, mini(cx + bw, w)):
+				var old := img.get_pixel(px, py)
+				img.set_pixel(px, py, old.lerp(Color(0.1, 0.08, 0.07, 1.0), 0.45))
+
+	# Grime drips and rust blooms.
+	for i in 42:
+		var x := rng.randi_range(0, w - 1)
+		var y0 := rng.randi_range(0, maxi(0, h / 2))
+		var length := rng.randi_range(14, mini(120, h))
+		for k in length:
+			var y := y0 + k
+			if y >= h:
+				break
+			var old := img.get_pixel(x, y)
+			img.set_pixel(x, y, old.lerp(Color(0.04, 0.05, 0.06, 1.0), 0.07))
+	for i in 10:
+		var cx := rng.randf_range(0.0, float(w))
+		var cy := rng.randf_range(0.0, float(h))
+		var radius := rng.randf_range(8.0, float(maxi(8, w / 5)))
+		var ir := int(radius)
+		for dy in range(-ir, ir):
+			for dx in range(-ir, ir):
+				var px := int(cx) + dx
+				var py := int(cy) + dy
+				if px < 0 or px >= w or py < 0 or py >= h:
+					continue
+				var dist := sqrt(float(dx * dx + dy * dy)) / radius
+				if dist < 1.0:
+					var old := img.get_pixel(px, py)
+					img.set_pixel(px, py, old.lerp(Color(0.3, 0.13, 0.06, 1.0), (1.0 - dist) * 0.28))
+	return ImageTexture.create_from_image(img)
+
+
 func _make_noise(frequency: float, size: int, low: Color, high: Color) -> NoiseTexture2D:
 	var noise := FastNoiseLite.new()
 	noise.frequency = frequency
@@ -189,6 +269,7 @@ func _draw() -> void:
 	_draw_mist()
 	_draw_steam()
 	_draw_reflections()
+	_draw_ambient_wash()
 	_draw_splashes()
 	_draw_cables()
 	_draw_graffiti()
@@ -203,16 +284,21 @@ func _draw_ground() -> void:
 
 func _draw_buildings() -> void:
 	var top := Rect2(0, 0, 1600, 140)
-	draw_texture_rect(_concrete, top, true)
+	draw_texture_rect(_facade_top, top, false)
 	draw_rect(top, Color(0.02, 0.03, 0.04, 0.2))
 
 	var left := Rect2(0, 0, 240, 1000)
-	draw_texture_rect(_concrete, left, true, Color(0.94, 0.96, 1.0))
+	draw_texture_rect(_facade_side, left, false, Color(0.94, 0.96, 1.0))
 	draw_rect(left, Color(0.02, 0.03, 0.05, 0.24))
 
 	var right := Rect2(1360, 0, 240, 1000)
-	draw_texture_rect(_concrete, right, true, Color(0.9, 0.92, 0.98))
+	draw_texture_rect(_facade_side, right, false, Color(0.9, 0.92, 0.98))
 	draw_rect(right, Color(0.02, 0.03, 0.05, 0.26))
+
+	# Ambient occlusion where the walls meet the ground.
+	draw_rect(Rect2(240, 140, 1120, 26), Color(0.0, 0.01, 0.02, 0.32))
+	draw_rect(Rect2(240, 140, 26, 860), Color(0.0, 0.01, 0.02, 0.26))
+	draw_rect(Rect2(1334, 140, 26, 860), Color(0.0, 0.01, 0.02, 0.26))
 
 	draw_line(Vector2(240, 140), Vector2(240, 1000), Color(0.03, 0.04, 0.06, 0.95), 5.0)
 	draw_line(Vector2(1360, 140), Vector2(1360, 1000), Color(0.03, 0.04, 0.06, 0.95), 5.0)
@@ -550,6 +636,16 @@ func _draw_reflections() -> void:
 		var p := Vector2(rng.randf_range(320.0, 1290.0), rng.randf_range(260.0, 930.0))
 		var length := rng.randf_range(4.0, 18.0)
 		draw_line(p, p + Vector2(length, 0), Color(0.55, 0.8, 0.9, rng.randf_range(0.015, 0.05)), 1.0)
+
+
+## Broad colored light bleeding across the whole yard plus low fog banks.
+## This unifies the separate materials into one atmosphere.
+func _draw_ambient_wash() -> void:
+	draw_texture_rect(GLOW, Rect2(-120, 620, 640, 500), false, Color(0.92, 0.12, 0.42, 0.1))
+	draw_texture_rect(GLOW, Rect2(1080, 380, 640, 540), false, Color(0.12, 0.65, 0.95, 0.09))
+	var warm := 0.1 if _powered else 0.035
+	draw_texture_rect(GLOW, Rect2(560, 240, 480, 400), false, Color(1.0, 0.6, 0.3, warm))
+	draw_texture_rect(GLOW, Rect2(240, 780, 1120, 260), false, Color(0.55, 0.62, 0.72, 0.07))
 
 
 func _draw_splashes() -> void:

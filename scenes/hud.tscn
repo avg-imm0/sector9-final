@@ -11,6 +11,7 @@ code = "shader_type canvas_item;
 uniform float strength : hint_range(0.0, 1.0) = 0.72;
 uniform float scanlines : hint_range(0.0, 0.05) = 0.011;
 uniform float grain : hint_range(0.0, 0.15) = 0.038;
+uniform float rain : hint_range(0.0, 1.0) = 0.42;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -25,7 +26,24 @@ void fragment() {
 	float fiber = (sin(UV.x * 420.0 + sin(UV.y * 57.0) * 3.1) * 0.5 + 0.5) * 0.008;
 	float scan = (0.5 + 0.5 * sin(UV.y * 1100.0)) * scanlines;
 
-	float alpha = clamp(v + scan + abs(n) * grain + fiber, 0.0, 0.96);
+	// Raindrops sliding down the camera lens with short trails.
+	float drops = 0.0;
+	for (int i = 0; i < 6; i++) {
+		float fi = float(i);
+		float dx = fract(0.137 + fi * 0.163);
+		float speed = 0.018 + fi * 0.004;
+		float dy = fract(fi * 0.231 - TIME * speed);
+		vec2 delta = (UV - vec2(dx, dy)) * vec2(1.0, 1.7);
+		float d = length(delta);
+		drops += smoothstep(0.028, 0.0, d) * 0.09;
+		drops += smoothstep(0.009, 0.0, d) * 0.07;
+		float trail = smoothstep(0.0035, 0.0, abs(UV.x - dx))
+			* smoothstep(0.14, 0.0, UV.y - dy) * step(dy, UV.y) * 0.05;
+		drops += trail;
+	}
+	drops *= rain;
+
+	float alpha = clamp(v + scan + abs(n) * grain + fiber + drops, 0.0, 0.96);
 	COLOR = vec4(vec3(0.012, 0.009, 0.007), alpha);
 }
 "
