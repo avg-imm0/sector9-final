@@ -36,11 +36,17 @@ var _speaker_label: Label
 var _text_label: Label
 var _choice_box: VBoxContainer
 var _hint_label: Label
+var _rec_dot: ColorRect
 
 
 func _ready() -> void:
 	_load_data()
 	_build_ui()
+	if _rec_dot != null:
+		var rec := create_tween()
+		rec.set_loops()
+		rec.tween_property(_rec_dot, "modulate", Color(1, 1, 1, 0.25), 0.9)
+		rec.tween_property(_rec_dot, "modulate", Color(1, 1, 1, 1.0), 0.9)
 
 
 func _load_data() -> void:
@@ -123,6 +129,12 @@ func _build_ui() -> void:
 	red_bar.custom_minimum_size = Vector2(3, 17)
 	red_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header.add_child(red_bar)
+
+	_rec_dot = ColorRect.new()
+	_rec_dot.color = UITheme.RED_BRIGHT
+	_rec_dot.custom_minimum_size = Vector2(5, 5)
+	_rec_dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	header.add_child(_rec_dot)
 
 	_speaker_label = UITheme.label("", 15, UITheme.TEXT)
 	_speaker_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))

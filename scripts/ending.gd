@@ -61,6 +61,32 @@ func _build_ui() -> void:
 	ink.anchor_bottom = 1.0
 	_panel.add_child(ink)
 
+	# Faint paper fibres over the ink and a huge faded sector number.
+	var paper := TextureRect.new()
+	paper.texture = UITheme.PAPER
+	paper.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	paper.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	paper.stretch_mode = TextureRect.STRETCH_SCALE
+	paper.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	paper.modulate = Color(1, 1, 1, 0.06)
+	paper.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.add_child(paper)
+
+	var watermark := UITheme.label("09", 150, Color(0.86, 0.82, 0.72, 0.05), UITheme.FONT_DISPLAY)
+	watermark.anchor_left = 1.0
+	watermark.anchor_right = 1.0
+	watermark.anchor_top = 1.0
+	watermark.anchor_bottom = 1.0
+	watermark.offset_left = -210.0
+	watermark.offset_top = -190.0
+	watermark.offset_right = -20.0
+	watermark.offset_bottom = -20.0
+	watermark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	watermark.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	watermark.add_theme_constant_override("outline_size", 0)
+	watermark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.add_child(watermark)
+
 	var margin := MarginContainer.new()
 	margin.anchor_right = 1.0
 	margin.anchor_bottom = 1.0

@@ -66,6 +66,16 @@ func _build() -> void:
 	ink.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	panel.add_child(ink)
 
+	var fibres := TextureRect.new()
+	fibres.texture = UITheme.PAPER
+	fibres.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	fibres.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fibres.stretch_mode = TextureRect.STRETCH_SCALE
+	fibres.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	fibres.modulate = Color(1, 1, 1, 0.05)
+	fibres.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(fibres)
+
 	var margin := MarginContainer.new()
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 28)

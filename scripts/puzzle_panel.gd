@@ -18,10 +18,24 @@ var _buttons: Array[TextureButton] = []
 var _sequence: Array[int] = []
 var _solved := false
 var _is_open := false
+var _led_glow: Sprite2D
 
 
 func _setup() -> void:
 	_build_ui()
+	_led_glow = Sprite2D.new()
+	_led_glow.texture = preload("res://assets/textures/glow.svg")
+	_led_glow.position = led.position
+	_led_glow.scale = Vector2(0.5, 0.5)
+	_led_glow.z_index = -1
+	add_child(_led_glow)
+
+
+func _update(_delta: float) -> void:
+	if _solved:
+		_led_glow.modulate = Color(0.4, 1.0, 0.5, 0.6 + sin(_time * 3.0) * 0.15)
+	else:
+		_led_glow.modulate = Color(1.0, 0.3, 0.18, 0.4 + sin(_time * 2.0) * 0.1)
 
 
 func _build_ui() -> void:

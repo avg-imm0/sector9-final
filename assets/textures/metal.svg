@@ -1,12 +1,68 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#161c22"/>
-  <path d="M0 16 H64 M0 43 H64 M18 0 V64 M49 0 V64" stroke="#0c1014" stroke-width="2" opacity="0.7"/>
-  <path d="M3 8 L28 24 M39 3 L58 21 M4 52 L22 37" stroke="#2c3740" stroke-width="1" opacity="0.8"/>
-  <path d="M0 0 H64 V64 H0 Z" fill="none" stroke="#0a0e11" stroke-width="3"/>
-  <circle cx="6" cy="6" r="2" fill="#3a454e"/>
-  <circle cx="58" cy="6" r="2" fill="#3a454e"/>
-  <circle cx="6" cy="58" r="2" fill="#3a454e"/>
-  <circle cx="58" cy="58" r="2" fill="#3a454e"/>
-  <circle cx="34" cy="50" r="6" fill="#6b3a1e" opacity="0.3"/>
-  <path d="M12 30 L19 26 L23 30" stroke="#4a565f" stroke-width="1" fill="none" opacity="0.55"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#222a31"/>
+      <stop offset="0.42" stop-color="#171e24"/>
+      <stop offset="1" stop-color="#10161b"/>
+    </linearGradient>
+    <linearGradient id="grime" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#05080a" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#05080a" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="rust" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#8a4a22" stop-opacity="0.55"/>
+      <stop offset="0.6" stop-color="#6b3a1e" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#6b3a1e" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grain" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M0 1 H8 M0 5 H8" stroke="#38434c" stroke-width="0.4" opacity="0.22"/>
+      <path d="M2 0 V8 M6 0 V8" stroke="#080c0f" stroke-width="0.4" opacity="0.35"/>
+    </pattern>
+  </defs>
+
+  <rect width="256" height="256" fill="url(#steel)"/>
+  <rect width="256" height="256" fill="url(#grain)"/>
+
+  <!-- Panel seams: horizontal ribs and vertical joints -->
+  <g stroke="#080d11" stroke-width="2.2" opacity="0.85">
+    <path d="M0 32 H256 M0 96 H256 M0 160 H256 M0 224 H256"/>
+    <path d="M64 0 V256 M192 0 V256"/>
+  </g>
+  <g stroke="#3a4650" stroke-width="0.9" opacity="0.45">
+    <path d="M0 34 H256 M0 98 H256 M0 162 H256 M0 226 H256"/>
+    <path d="M66 0 V256 M194 0 V256"/>
+  </g>
+
+  <!-- Bolt heads at panel corners -->
+  <g fill="#4a565f" stroke="#080c10" stroke-width="1.2">
+    <circle cx="10" cy="10" r="3.2"/><circle cx="246" cy="10" r="3.2"/>
+    <circle cx="10" cy="246" r="3.2"/><circle cx="246" cy="246" r="3.2"/>
+    <circle cx="74" cy="74" r="2.8"/><circle cx="182" cy="74" r="2.8"/>
+    <circle cx="74" cy="182" r="2.8"/><circle cx="182" cy="182" r="2.8"/>
+  </g>
+
+  <!-- Scratches -->
+  <g stroke="#59656e" stroke-width="0.9" fill="none" opacity="0.42">
+    <path d="M14 54 L96 61 M112 118 L204 112 M30 190 L118 197 M150 30 L226 38"/>
+    <path d="M8 148 L56 143 M132 212 L238 208 M92 82 L150 88"/>
+  </g>
+  <g stroke="#05080b" stroke-width="1.1" fill="none" opacity="0.5">
+    <path d="M20 56 L98 63 M116 120 L206 114 M36 192 L120 199"/>
+  </g>
+
+  <!-- Rust blooms and streaks -->
+  <ellipse cx="46" cy="44" rx="26" ry="17" fill="url(#rust)"/>
+  <ellipse cx="210" cy="140" rx="34" ry="22" fill="url(#rust)"/>
+  <ellipse cx="108" cy="236" rx="22" ry="12" fill="url(#rust)"/>
+  <g stroke="#5a3219" stroke-width="1.4" opacity="0.38" fill="none">
+    <path d="M46 52 Q44 78 50 96 M210 150 Q206 176 214 198 M108 240 Q110 250 106 256"/>
+  </g>
+
+  <!-- Water grime running down from the top edge -->
+  <rect x="0" y="0" width="256" height="34" fill="url(#grime)"/>
+  <g stroke="#0a1114" stroke-width="2" opacity="0.32">
+    <path d="M28 0 V22 M96 0 V30 M170 0 V18 M232 0 V26"/>
+  </g>
+
+  <rect x="1.5" y="1.5" width="253" height="253" fill="none" stroke="#070b0e" stroke-width="3"/>
 </svg>

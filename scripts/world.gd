@@ -7,33 +7,144 @@ const WORLD := Vector2(1600, 1000)
 const FONT_SIGN: Font = preload("res://assets/fonts/Oswald.ttf")
 const FONT_BODY: Font = preload("res://assets/fonts/EBGaramond.ttf")
 
-var _asphalt: NoiseTexture2D
-var _concrete: NoiseTexture2D
+const GROUND_TEX_SIZE := Vector2i(800, 500)
+const CONCRETE_TEX_SIZE := 512
+
+var _asphalt: ImageTexture
+var _concrete: ImageTexture
 var _metal: NoiseTexture2D
 var _font: Font
+var _time := 0.0
+var _anim_timer: Timer
+var _powered := false
 
 
 func _ready() -> void:
 	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
-	_asphalt = _make_noise(
-		0.06, 256,
-		Color(0.27, 0.3, 0.36),
-		Color(0.42, 0.46, 0.53)
-	)
-	_concrete = _make_noise(
-		0.04, 256,
-		Color(0.34, 0.36, 0.42),
-		Color(0.55, 0.58, 0.64)
-	)
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_asphalt = _make_asphalt_texture()
+	_concrete = _make_concrete_texture()
 	_metal = _make_noise(
 		0.16, 128,
 		Color(0.3, 0.34, 0.39),
 		Color(0.58, 0.62, 0.68)
 	)
 	_font = FONT_SIGN
+	_powered = GameState.power_on
+	GameState.power_restored.connect(_on_power_restored)
 	queue_redraw()
+	_anim_timer = Timer.new()
+	_anim_timer.wait_time = 0.25
+	_anim_timer.timeout.connect(_on_anim_timeout)
+	add_child(_anim_timer)
+	_anim_timer.start()
 	await get_tree().create_timer(0.25).timeout
 	queue_redraw()
+
+
+func _on_anim_timeout() -> void:
+	_time += 0.25
+	queue_redraw()
+
+
+func _on_power_restored() -> void:
+	_powered = true
+	queue_redraw()
+
+
+## High-resolution asphalt with aggregate, blotches, wet patches and cracks.
+## Generated once as a unique texture for the whole yard instead of a small
+## repeating noise tile — this is what gives the ground real detail up close.
+func _make_asphalt_texture() -> ImageTexture:
+	var w := GROUND_TEX_SIZE.x
+	var h := GROUND_TEX_SIZE.y
+	var img := Image.create(w, h, true, Image.FORMAT_RGBA8)
+	var grain := FastNoiseLite.new()
+	grain.frequency = 0.22
+	grain.fractal_octaves = 4
+	grain.fractal_gain = 0.55
+	var blotch := FastNoiseLite.new()
+	blotch.frequency = 0.012
+	blotch.fractal_octaves = 3
+	var wetmask := FastNoiseLite.new()
+	wetmask.frequency = 0.006
+	wetmask.fractal_octaves = 2
+	for y in h:
+		for x in w:
+			var g := grain.get_noise_2d(x, y) * 0.5 + 0.5
+			var b := blotch.get_noise_2d(x, y) * 0.5 + 0.5
+			var wm := wetmask.get_noise_2d(x, y) * 0.5 + 0.5
+			var v := 0.13 + g * 0.17 + b * 0.1
+			if wm > 0.58:
+				v -= (wm - 0.58) * 0.32
+			img.set_pixel(x, y, Color(v * 0.94, v, v * 1.16, 1.0))
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3317
+	# Aggregate: thousands of tiny light and dark stones.
+	for i in 11000:
+		var x := rng.randi_range(0, w - 1)
+		var y := rng.randi_range(0, h - 1)
+		var old := img.get_pixel(x, y)
+		var light := rng.randf() < 0.42
+		var stone := Color(0.62, 0.66, 0.7, 1.0) if light else Color(0.02, 0.03, 0.04, 1.0)
+		img.set_pixel(x, y, old.lerp(stone, rng.randf_range(0.18, 0.5)))
+	# Hairline cracks wandering across the asphalt.
+	for c in 30:
+		var x := rng.randf_range(0.0, float(w))
+		var y := rng.randf_range(0.0, float(h))
+		var angle := rng.randf_range(0.0, TAU)
+		var steps := rng.randi_range(12, 48)
+		for s in steps:
+			var px := int(x)
+			var py := int(y)
+			if px >= 0 and px < w and py >= 0 and py < h:
+				var old := img.get_pixel(px, py)
+				img.set_pixel(px, py, old.lerp(Color(0.02, 0.026, 0.03, 1.0), 0.68))
+			angle += rng.randf_range(-0.28, 0.28)
+			x += cos(angle) * 3.0
+			y += sin(angle) * 3.0
+	return ImageTexture.create_from_image(img)
+
+
+## Concrete with fine grain, panel seams and dirt running down from the top.
+func _make_concrete_texture() -> ImageTexture:
+	var size := CONCRETE_TEX_SIZE
+	var img := Image.create(size, size, true, Image.FORMAT_RGBA8)
+	var grain := FastNoiseLite.new()
+	grain.frequency = 0.3
+	grain.fractal_octaves = 4
+	var stain := FastNoiseLite.new()
+	stain.frequency = 0.008
+	stain.fractal_octaves = 3
+	for y in size:
+		for x in size:
+			var g := grain.get_noise_2d(x, y) * 0.5 + 0.5
+			var s := stain.get_noise_2d(x, y) * 0.5 + 0.5
+			var v := 0.28 + g * 0.18 + s * 0.1
+			img.set_pixel(x, y, Color(v, v * 1.01, v * 1.06, 1.0))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 8813
+	# Panel joints and rust/dirt streaks.
+	for x in [0, size / 2]:
+		for y in size:
+			var old := img.get_pixel(x, y)
+			img.set_pixel(x, y, old.lerp(Color(0.06, 0.07, 0.08, 1.0), 0.8))
+	for y in [0, size / 2]:
+		for x in size:
+			var old := img.get_pixel(x, y)
+			img.set_pixel(x, y, old.lerp(Color(0.07, 0.075, 0.08, 1.0), 0.55))
+	for i in 26:
+		var x := rng.randi_range(0, size - 1)
+		var y0 := rng.randi_range(0, size / 2)
+		var length := rng.randi_range(40, 180)
+		for k in length:
+			var y := mini(y0 + k, size - 1)
+			if y >= size:
+				break
+			var old := img.get_pixel(x, y)
+			img.set_pixel(x, y, old.lerp(Color(0.12, 0.11, 0.1, 1.0), 0.12))
+	return ImageTexture.create_from_image(img)
 
 
 func _make_noise(frequency: float, size: int, low: Color, high: Color) -> NoiseTexture2D:
@@ -57,14 +168,26 @@ func _draw() -> void:
 	_draw_ground()
 	_draw_buildings()
 	_draw_sidewalks()
+	_draw_object_shadows()
 	_draw_windows()
 	_draw_wall_details()
 	_draw_wall_pipes()
+	_draw_wall_grunge()
 	_draw_posters()
 	_draw_fence()
 	_draw_ground_marks()
 	_draw_wet_stains()
+	_draw_oil_stains()
 	_draw_puddles()
+	_draw_puddle_glints()
+	_draw_puddle_ripples()
+	_draw_lamp_pools()
+	_draw_wet_streaks()
+	_draw_wet_film()
+	_draw_wet_sparkles()
+	_draw_window_rays()
+	_draw_mist()
+	_draw_steam()
 	_draw_reflections()
 	_draw_splashes()
 	_draw_cables()
@@ -74,8 +197,8 @@ func _draw() -> void:
 
 
 func _draw_ground() -> void:
-	draw_texture_rect(_asphalt, Rect2(0, 0, 1600, 1000), true)
-	draw_rect(Rect2(0, 0, 1600, 1000), Color(0.02, 0.04, 0.07, 0.16))
+	draw_texture_rect(_asphalt, Rect2(0, 0, 1600, 1000), false)
+	draw_rect(Rect2(0, 0, 1600, 1000), Color(0.02, 0.04, 0.07, 0.1))
 
 
 func _draw_buildings() -> void:
@@ -118,6 +241,14 @@ func _draw_sidewalks() -> void:
 		draw_line(Vector2(1306, y), Vector2(1360, y), Color(0.02, 0.03, 0.04, 0.35), 1.0)
 
 
+func _draw_object_shadows() -> void:
+	# A soft grounding shadow under the kiosk, squashed into an ellipse.
+	draw_set_transform(Vector2(800, 418), 0.0, Vector2(1.0, 0.32))
+	draw_circle(Vector2.ZERO, 150.0, Color(0.0, 0.01, 0.015, 0.22))
+	draw_circle(Vector2.ZERO, 180.0, Color(0.0, 0.01, 0.015, 0.1))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
 func _draw_windows() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 771
@@ -141,8 +272,19 @@ func _draw_window(rect: Rect2, rng: RandomNumberGenerator) -> void:
 	var color := Color(0.02, 0.04, 0.06)
 	if lit:
 		color = Color(1.0, 0.72, 0.4) if rng.randf() < 0.65 else Color(0.45, 0.8, 1.0)
-		draw_rect(rect.grow(12.0), Color(color.r, color.g, color.b, 0.06))
+		var flicker := 0.88 + 0.12 * sin(_time * 1.7 + rect.position.x * 0.07)
+		draw_rect(rect.grow(12.0), Color(color.r, color.g, color.b, 0.06 * flicker))
 	draw_rect(rect, color)
+	# Faint silhouettes inside so lit windows feel inhabited.
+	if lit:
+		var ix := rect.position.x + 5.0
+		var iy := rect.end.y - 3.0
+		draw_rect(Rect2(ix, iy - 15.0, rect.size.x * 0.28, 15.0), Color(0.08, 0.06, 0.05, 0.55))
+		draw_circle(Vector2(rect.end.x - 10.0, iy - 22.0), 6.0, Color(0.07, 0.06, 0.05, 0.45))
+	# Rain running down the glass.
+	for j in 3:
+		var sx := rect.position.x + 8.0 + j * (rect.size.x - 16.0) / 2.0 + sin(_time * 0.7 + j) * 1.0
+		draw_line(Vector2(sx, rect.position.y + 4.0), Vector2(sx - 1.0, rect.end.y - 4.0), Color(0.6, 0.78, 0.9, 0.05), 1.0)
 	draw_line(Vector2(rect.position.x + rect.size.x * 0.5, rect.position.y), Vector2(rect.position.x + rect.size.x * 0.5, rect.end.y), Color(0.02, 0.03, 0.04, 0.9), 2.0)
 	draw_line(Vector2(rect.position.x, rect.position.y + rect.size.y * 0.5), Vector2(rect.end.x, rect.position.y + rect.size.y * 0.5), Color(0.02, 0.03, 0.04, 0.7), 1.0)
 
@@ -204,6 +346,42 @@ func _ac_unit(pos: Vector2, width: float, height: float) -> void:
 	draw_circle(Vector2(drip_x + 2, pos.y + height + 90), 4.0, Color(0.1, 0.16, 0.18, 0.25))
 
 
+## Peeling paint, exposed brick and dirt streaks on the concrete walls.
+func _draw_wall_grunge() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 6621
+	# Water streaks running down from the window sills.
+	for x in range(310, 1300, 118):
+		if rng.randf() < 0.35:
+			continue
+		var y := rng.randf_range(102.0, 120.0)
+		var length := rng.randf_range(50.0, 210.0)
+		draw_line(Vector2(x, y), Vector2(x + rng.randf_range(-3.0, 3.0), y + length), Color(0.03, 0.045, 0.055, 0.38), rng.randf_range(1.5, 4.0))
+	# Patches of peeled paint with brick showing through.
+	for side in 2:
+		var x0 := 40.0 if side == 0 else 1380.0
+		var x1 := 220.0 if side == 0 else 1560.0
+		for i in 7:
+			var cx := rng.randf_range(x0, x1)
+			var cy := rng.randf_range(230.0, 900.0)
+			var pw := rng.randf_range(22.0, 58.0)
+			var ph := rng.randf_range(28.0, 78.0)
+			var points := PackedVector2Array()
+			for k in 9:
+				var a := TAU * k / 9.0
+				var r := 1.0 + rng.randf_range(-0.3, 0.3)
+				points.append(Vector2(cx + cos(a) * pw * 0.5 * r, cy + sin(a) * ph * 0.5 * r))
+			draw_colored_polygon(points, Color(0.12, 0.115, 0.105, 0.5))
+			for row in 4:
+				var by := cy - ph * 0.35 + row * ph * 0.22
+				draw_line(Vector2(cx - pw * 0.4, by), Vector2(cx + pw * 0.4, by), Color(0.34, 0.21, 0.16, 0.35), 1.0)
+	# Damp mould spots near the ground.
+	for i in 12:
+		var x := rng.randf_range(250.0, 1350.0)
+		var y := rng.randf_range(880.0, 945.0)
+		draw_circle(Vector2(x, y), rng.randf_range(8.0, 26.0), Color(0.08, 0.11, 0.09, 0.22))
+
+
 func _draw_posters() -> void:
 	_wall_poster(Vector2(214, 338), -PI * 0.5, 46, 64, "ХЛЕБ", "С 7 УТРА", Color(0.62, 0.57, 0.46, 0.42))
 	_wall_poster(Vector2(214, 742), -PI * 0.5, 42, 58, "РЕМОНТ", "ОБУВИ", Color(0.55, 0.52, 0.44, 0.34))
@@ -212,7 +390,7 @@ func _draw_posters() -> void:
 
 
 func _wall_poster(center: Vector2, rotation: float, width: float, height: float, title: String, subtitle: String, tint: Color) -> void:
-	draw_set_transform(center, rotation, Vector2.ONE)
+	draw_set_transform(center, rotation + sin(_time * 0.8 + center.x * 0.01) * 0.012, Vector2.ONE)
 	draw_rect(Rect2(-width * 0.5 + 2, -height * 0.5 + 3, width, height), Color(0, 0, 0, 0.25))
 	draw_rect(Rect2(-width * 0.5, -height * 0.5, width, height), tint)
 	draw_rect(Rect2(-width * 0.5, -height * 0.5, width, height), Color(0.2, 0.17, 0.13, 0.28), false, 1.0)
@@ -288,6 +466,29 @@ func _draw_puddles() -> void:
 	_puddle(Vector2(390, 700), Vector2(120, 60), 19)
 
 
+## Dark oil slicks with a faint iridescent sheen on the wet asphalt.
+func _draw_oil_stains() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7781
+	var spots: Array[Vector2] = [
+		Vector2(520, 470), Vector2(1180, 350),
+		Vector2(860, 860), Vector2(360, 560)
+	]
+	for center in spots:
+		var w := rng.randf_range(50.0, 110.0)
+		var h := rng.randf_range(22.0, 52.0)
+		var points := PackedVector2Array()
+		for i in 16:
+			var a := TAU * i / 16.0
+			var r := 1.0 + rng.randf_range(-0.25, 0.25)
+			points.append(center + Vector2(cos(a) * w * 0.5 * r, sin(a) * h * 0.5 * r))
+		draw_colored_polygon(points, Color(0.012, 0.018, 0.024, 0.6))
+		var rim := points.duplicate()
+		rim.append(points[0])
+		draw_polyline(rim, Color(0.32, 0.24, 0.5, 0.22), 1.5, true)
+		draw_line(center + Vector2(-w * 0.22, -h * 0.12), center + Vector2(w * 0.25, -h * 0.16), Color(0.38, 0.8, 0.95, 0.12), 2.0, true)
+
+
 func _puddle(center: Vector2, size: Vector2, seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
@@ -298,10 +499,10 @@ func _puddle(center: Vector2, size: Vector2, seed_value: int) -> void:
 		var radius := 1.0 + rng.randf_range(-0.16, 0.16)
 		points.append(center + Vector2(cos(angle) * size.x * 0.5 * radius, sin(angle) * size.y * 0.5 * radius))
 
-	draw_colored_polygon(points, Color(0.035, 0.075, 0.11, 0.62))
+	draw_colored_polygon(points, Color(0.02, 0.06, 0.1, 0.82))
 	var rim := points.duplicate()
 	rim.append(points[0])
-	draw_polyline(rim, Color(0.35, 0.65, 0.78, 0.28), 1.5, true)
+	draw_polyline(rim, Color(0.4, 0.72, 0.86, 0.45), 1.8, true)
 
 	for i in 3:
 		var y := center.y - size.y * 0.25 + i * size.y * 0.22
@@ -312,12 +513,14 @@ func _puddle(center: Vector2, size: Vector2, seed_value: int) -> void:
 func _draw_reflections() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 4401
+	var boost := 1.7 if _powered else 1.0
+	var shimmer := (0.85 + 0.15 * sin(_time * 1.3)) * boost
 
 	# Kiosk sign bleeding into the wet asphalt.
 	for i in 12:
 		var x := 690.0 + i * 20.0 + rng.randf_range(-4.0, 4.0)
 		var length := rng.randf_range(55.0, 125.0)
-		var color := Color(1.0, 0.24, 0.5, rng.randf_range(0.035, 0.09))
+		var color := Color(1.0, 0.24, 0.5, rng.randf_range(0.035, 0.09) * shimmer)
 		draw_line(Vector2(x, 402.0), Vector2(x + rng.randf_range(-4.0, 4.0), 402.0 + length), color, rng.randf_range(1.5, 4.0))
 	for i in 8:
 		var x := rng.randf_range(660.0, 950.0)
@@ -327,12 +530,12 @@ func _draw_reflections() -> void:
 	# Left wall bar sign.
 	for i in 7:
 		var y := 760.0 + i * 18.0 + rng.randf_range(-5.0, 5.0)
-		draw_line(Vector2(248.0, y), Vector2(248.0 + rng.randf_range(24.0, 58.0), y + rng.randf_range(-3.0, 3.0)), Color(0.95, 0.2, 0.45, rng.randf_range(0.03, 0.075)), rng.randf_range(1.5, 3.5))
+		draw_line(Vector2(248.0, y), Vector2(248.0 + rng.randf_range(24.0, 58.0), y + rng.randf_range(-3.0, 3.0)), Color(0.95, 0.2, 0.45, rng.randf_range(0.03, 0.075) * shimmer), rng.randf_range(1.5, 3.5))
 
 	# Right wall cyan sign.
 	for i in 8:
 		var y := 586.0 + i * 16.0 + rng.randf_range(-4.0, 4.0)
-		draw_line(Vector2(1296.0, y), Vector2(1296.0 - rng.randf_range(20.0, 54.0), y + rng.randf_range(-2.0, 2.0)), Color(0.35, 0.82, 1.0, rng.randf_range(0.025, 0.06)), rng.randf_range(1.4, 3.0))
+		draw_line(Vector2(1296.0, y), Vector2(1296.0 - rng.randf_range(20.0, 54.0), y + rng.randf_range(-2.0, 2.0)), Color(0.35, 0.82, 1.0, rng.randf_range(0.025, 0.06) * shimmer), rng.randf_range(1.4, 3.0))
 
 	# Street lamp reflections.
 	for i in 6:
@@ -397,6 +600,8 @@ func _lamp_pole(base: Vector2) -> void:
 	draw_circle(head, 9.0, Color(0.08, 0.09, 0.11))
 	draw_circle(head, 6.0, Color(1.0, 0.8, 0.45, 0.85))
 	draw_circle(base, 10.0, Color(0.07, 0.08, 0.09))
+	# Warm halo of light spilling from the lamp head onto the wet ground.
+	draw_circle(head + Vector2(6, 0), 34.0, Color(1.0, 0.75, 0.5, 0.08 + 0.03 * sin(_time * 0.7)))
 
 
 func _draw_debris() -> void:
@@ -409,3 +614,110 @@ func _draw_debris() -> void:
 	for i in 9:
 		var pos := Vector2(rng.randf_range(360.0, 520.0), rng.randf_range(640.0, 740.0))
 		draw_circle(pos, rng.randf_range(2.0, 5.0), Color(0.1, 0.1, 0.11, 0.7))
+
+
+## Animated faint glints — moving reflections of lights on the wet ground in
+## the puddles. Uses the timer-driven `_time` so it shifts slowly over time.
+func _draw_puddle_glints() -> void:
+	var centers: Array[Vector2] = [Vector2(640, 690), Vector2(1080, 760), Vector2(920, 900), Vector2(1080, 520), Vector2(390, 700)]
+	var boost := 1.8 if _powered else 1.0
+	for center in centers:
+		for i in 3:
+			var y := center.y - 12.0 + i * 22.0 + sin(_time * 0.8) * 4.0
+			draw_line(Vector2(center.x - 42.0, y), Vector2(center.x + 52.0, y), Color(1.0, 0.78, 0.5, 0.13 * boost), 2.0, true)
+
+
+## Expanding rain ripples on the puddles — faint circles that fade out.
+func _draw_puddle_ripples() -> void:
+	var centers: Array[Vector2] = [Vector2(640, 690), Vector2(1080, 760), Vector2(920, 900), Vector2(1080, 520), Vector2(390, 700)]
+	for center in centers:
+		for i in 3:
+			var phase := fmod(_time * 0.5 + i * 0.34 + center.x * 0.001, 1.0)
+			var radius := 4.0 + phase * 44.0
+			var alpha := (1.0 - phase) * 0.16
+			var offset := Vector2(sin(i * 2.4 + center.y) * 14.0, cos(i * 1.9 + center.x) * 6.0)
+			draw_arc(center + offset, radius, 0.0, TAU, 18, Color(0.72, 0.88, 0.98, alpha), 1.2, true)
+
+
+## Warm pools of lamp light on the wet asphalt under the street lamps.
+func _draw_lamp_pools() -> void:
+	var bases: Array[Vector2] = [Vector2(430, 760), Vector2(1190, 720)]
+	for base in bases:
+		var alpha := 0.045 + 0.015 * sin(_time * 1.1 + base.x * 0.01)
+		draw_circle(base + Vector2(6, 14), 64.0, Color(1.0, 0.73, 0.46, alpha))
+	if _powered:
+		var alpha := 0.08 + 0.02 * sin(_time * 1.4)
+		draw_circle(Vector2(800, 430), 90.0, Color(1.0, 0.6, 0.35, alpha))
+
+
+## Subtle animated horizontal water streaks on the wet asphalt.
+func _draw_wet_streaks() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7711
+	for i in 26:
+		var y := fmod(_time * 3.0 + 220.0 + i * 41.0, 1000.0)
+		draw_line(Vector2(300.0, y), Vector2(1400.0, y), Color(0.75, 0.82, 0.9, 0.035), rng.randf_range(1.2, 2.4), true)
+
+
+## Wet film on the asphalt — faint horizontal streaks that read as a thin
+## sheen of rainwater on the ground.
+func _draw_wet_film() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 8822
+	for i in 30:
+		var y := 250.0 + i * 31.0
+		var alpha := 0.025 + rng.randf_range(0.0, 0.02)
+		draw_line(Vector2(300.0, y - 6.0), Vector2(1400.0, y + 6.0), Color(0.72, 0.8, 0.88, alpha), rng.randf_range(1.4, 2.2), true)
+
+
+## Tiny raindrops catching the light on the wet ground.
+func _draw_wet_sparkles() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3311
+	for i in 36:
+		var x := rng.randf_range(300.0, 1300.0)
+		var y := rng.randf_range(240.0, 920.0)
+		var twinkle := maxf(0.0, sin(_time * 2.0 + i * 1.7))
+		if twinkle < 0.72:
+			continue
+		var alpha := (twinkle - 0.72) * 0.45
+		draw_circle(Vector2(x, y), rng.randf_range(0.6, 1.6), Color(0.85, 0.93, 1.0, alpha))
+
+
+## Thin mist drifting over the ground, always slowly moving.
+func _draw_mist() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 9901
+	for i in 40:
+		var y := 220.0 + fmod(i * 41.0, 620.0)
+		var x := fmod(_time * 14.0 + 260.0 + fmod(i * 57.0, 1100.0), 1400.0)
+		draw_line(Vector2(x, y - 40.0), Vector2(x, y + 14.0), Color(0.5, 0.5, 0.55, 0.06), 2.2, true)
+
+
+## Faint steam wisps rising from the drains and warm spots of the yard.
+func _draw_steam() -> void:
+	var vents: Array[Vector2] = [Vector2(700, 830), Vector2(320, 300), Vector2(1260, 880)]
+	for vent in vents:
+		for i in 3:
+			var phase := fmod(_time * 0.35 + i * 0.33 + vent.x * 0.001, 1.0)
+			var y := vent.y - phase * 48.0
+			var x := vent.x + sin(phase * 6.0 + i) * 7.0
+			var alpha := (1.0 - phase) * 0.07
+			draw_circle(Vector2(x, y), 5.0 + phase * 12.0, Color(0.72, 0.82, 0.9, alpha))
+
+
+## Light rays fanning out from lit windows of the buildings.
+func _draw_window_rays() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5522
+	for x in range(300, 1330, 128):
+		if rng.randf() < 0.55:
+			continue
+		var from := Vector2(x + rng.randf_range(0.0, 52.0), 44.0)
+		draw_line(from, from + Vector2(rng.randf_range(8.0, 30.0), -rng.randf_range(60.0, 150.0)), Color(1.0, 0.72, 0.45, 0.05), rng.randf_range(1.5, 3.5))
+	for y in range(250, 880, 108):
+		for x in [64.0, 1392.0]:
+			if rng.randf() < 0.55:
+				continue
+			var start_y := y + rng.randf_range(12.0, 30.0)
+			draw_line(Vector2(x, start_y), Vector2(x + rng.randf_range(-35.0, 75.0), start_y + rng.randf_range(35.0, 90.0)), Color(0.72, 0.9, 1.0, 0.05), 1.5)

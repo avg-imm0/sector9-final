@@ -36,6 +36,13 @@ func _build() -> void:
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(shade)
 
+	# Animated rain over the title screenshot; purely decorative.
+	var rain := Control.new()
+	rain.set_script(preload("res://scripts/menu_rain.gd"))
+	rain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	rain.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(rain)
+
 	var fade := TextureRect.new()
 	fade.texture = _left_fade_texture()
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -66,6 +73,11 @@ func _build() -> void:
 	number.add_theme_constant_override("outline_size", 8)
 	number.custom_minimum_size = Vector2(0, 126)
 	title_block.add_child(number)
+	# Gentle neon breathing on the title number.
+	var title_pulse := create_tween()
+	title_pulse.set_loops()
+	title_pulse.tween_property(number, "modulate", Color(1, 1, 1, 0.82), 1.6)
+	title_pulse.tween_property(number, "modulate", Color(1, 1, 1, 1.0), 1.6)
 
 	var rule := ColorRect.new()
 	rule.color = Color(0.66, 0.12, 0.1, 0.8)

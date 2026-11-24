@@ -7,6 +7,12 @@ extends CanvasLayer
 func _ready() -> void:
 	GameState.objective_changed.connect(_on_objective_changed)
 	_apply_objective(GameState.objective, false)
+	# Slow breathing on the little red location marker.
+	var mark: ColorRect = $LocationMark
+	var pulse := create_tween()
+	pulse.set_loops()
+	pulse.tween_property(mark, "modulate", Color(1, 1, 1, 0.55), 1.3)
+	pulse.tween_property(mark, "modulate", Color(1, 1, 1, 1.0), 1.3)
 
 
 func _process(_delta: float) -> void:

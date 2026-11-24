@@ -6,6 +6,24 @@ extends Node2D
 @onready var sign_light: PointLight2D = $SignLight
 @onready var window_light: PointLight2D = $WindowLight
 @onready var window_glow: ColorRect = $WindowGlow
+@onready var drip_a: ColorRect = $AwningDripA
+@onready var drip_b: ColorRect = $AwningDripB
+@onready var drip_c: ColorRect = $AwningDripC
+
+var _powered := false
+var _time := 0.0
+
+
+func _process(delta: float) -> void:
+	_time += delta
+	# Water beads gathering and falling from the awning edge.
+	drip_a.modulate.a = 0.55 + 0.4 * sin(_time * 1.9)
+	drip_b.modulate.a = 0.5 + 0.4 * sin(_time * 2.3 + 1.7)
+	drip_c.modulate.a = 0.6 + 0.35 * sin(_time * 1.6 + 3.1)
+	if not _powered:
+		return
+	glow.modulate.a = 0.82 + 0.05 * sin(_time * 2.2)
+	sign_light.energy = 1.05 + 0.08 * sin(_time * 2.2 + 0.4)
 
 
 func _ready() -> void:
@@ -18,6 +36,7 @@ func _on_power_restored() -> void:
 
 
 func _apply_power(on: bool, instant: bool) -> void:
+	_powered = false
 	if not on:
 		neon.modulate = Color(1, 1, 1, 0.16)
 		sub.modulate = Color(1, 1, 1, 0.1)
@@ -34,6 +53,7 @@ func _apply_power(on: bool, instant: bool) -> void:
 		sign_light.energy = 1.1
 		window_light.energy = 1.0
 		window_glow.color = Color(1, 0.55, 0.22, 0.2)
+		_powered = true
 		return
 
 	var tween := create_tween()
@@ -45,3 +65,4 @@ func _apply_power(on: bool, instant: bool) -> void:
 	tween.parallel().tween_property(sign_light, "energy", 1.1, 0.5)
 	tween.parallel().tween_property(window_light, "energy", 1.0, 0.7)
 	tween.parallel().tween_property(window_glow, "color", Color(1, 0.55, 0.22, 0.2), 0.7)
+	tween.tween_callback(func(): _powered = true)

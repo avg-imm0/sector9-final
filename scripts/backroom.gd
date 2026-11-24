@@ -7,20 +7,31 @@ extends Interactable
 @onready var led: Sprite2D = $Led
 
 var _awaiting_ending := false
+var _glow: Sprite2D
 
 
 func _setup() -> void:
 	Dialogue.dialogue_finished.connect(_on_dialogue_finished)
 	Dialogue.dialogue_started.connect(_on_dialogue_started)
+	# Soft light spilling around the door once the sector has power.
+	_glow = Sprite2D.new()
+	_glow.texture = preload("res://assets/textures/glow.svg")
+	_glow.position = Vector2(0, 10)
+	_glow.scale = Vector2(0.95, 0.75)
+	_glow.z_index = -2
+	_glow.modulate = Color(1, 1, 1, 0)
+	add_child(_glow)
 
 
 func _update(delta: float) -> void:
 	if GameState.power_on:
 		led.modulate = Color(0.45, 1.0, 0.55, 0.75 + sin(_time * 3.0) * 0.2)
 		sprite.modulate = Color(1.0, 1.0, 1.0)
+		_glow.modulate = Color(0.35, 1.0, 0.6, 0.3 + sin(_time * 2.2) * 0.08)
 	else:
 		led.modulate = Color(0.9, 0.2, 0.15, 0.35)
 		sprite.modulate = Color(0.78, 0.8, 0.84)
+		_glow.modulate = Color(1, 0.4, 0.3, 0)
 
 	if GameState.has_key and can_interact():
 		prompt_text = "E — открыть подсобку"
